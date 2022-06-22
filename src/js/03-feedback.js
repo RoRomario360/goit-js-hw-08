@@ -23,9 +23,6 @@ function onSubmitForm(evt) {
     alert('Всі поля повинні бути заповнені');
     return;
   }
-  ///
-
-  ///
 
   formFeedback.reset();
   localStorage.clear();
