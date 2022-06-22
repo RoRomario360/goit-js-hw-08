@@ -1,36 +1,47 @@
 import throttle from 'lodash.throttle';
-const STORAGE_KEY = 'feedback-form-state';
-const formField = document.querySelector(`.feedback-form`);
 
-saveForm();
+const form = document.querySelector('.feedback-form');
 
-formField.addEventListener('submit', event => {
-  event.preventDefault();
-  const {
-    elements: { email, message },
-  } = event.currentTarget;
-  if (email.value === '' || message.value === '') {
-    return alert('Заполните все поля!');
+form.addEventListener('input', throttle(onInput, 500));
+form.addEventListener('submit', onSubmit);
+
+let dataResult = {};
+initForm();
+
+function onInput(event) {
+  dataResult = localStorage.getItem('feedback-form-state');
+  if (dataResult) {
+    dataResult = JSON.parse(dataResult);
+  } else {
+    dataResult = {};
   }
-  const data = { email: email.value, message: message.value };
-  console.log(data);
-  localStorage.removeItem(STORAGE_KEY);
-  event.currentTarget.reset();
-});
-formField.addEventListener('input', throttle(inputForm, 500));
-function inputForm(event) {
-  let filterInputs = localStorage.getItem(STORAGE_KEY);
-  filterInputs = filterInputs ? JSON.parse(filterInputs) : {};
-  filterInputs[event.target.name] = event.target.value;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(filterInputs));
-}
-function saveForm() {
-  let filterInputs = localStorage.getItem(STORAGE_KEY);
 
-  if (filterInputs) {
-    filterInputs = JSON.parse(filterInputs);
-    console.log(filterInputs);
-    formField.email.value = filterInputs.email;
-    // formField.message.value = filterInputs.message;
+  dataResult[event.target.name] = event.target.value;
+  localStorage.setItem('feedback-form-state', JSON.stringify(dataResult));
+}
+
+function onSubmit(event) {
+  event.preventDefault();
+
+  const { email, message } = event.target.elements;
+
+  if (!email.value || !message.value) {
+    return alert('Будь ласка заповніть всі поля!');
+  }
+  console.log(dataResult);
+  form.reset();
+  localStorage.clear();
+}
+
+function initForm() {
+  let initValues = localStorage.getItem('feedback-form-state');
+
+  if (initValues) {
+    initValues = JSON.parse(initValues);
+
+    Object.entries(initValues).forEach(([name, value]) => {
+      dataResult[name] = value;
+      form.elements[name].value = value;
+    });
   }
 }
