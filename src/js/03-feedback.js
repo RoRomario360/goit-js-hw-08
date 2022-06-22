@@ -1,42 +1,36 @@
 import throttle from 'lodash.throttle';
-const LOCALSTORAGE_KEY = 'feedback-form-state';
-const formFeedback = document.querySelector('.feedback-form');
-formFeedback.addEventListener('input', throttle(onFormData, 500));
-formFeedback.addEventListener('submit', onSubmitForm);
+const STORAGE_KEY = 'feedback-form-state';
+const formField = document.querySelector(`.feedback-form`);
 
-const formInputs = {};
-initForm();
+saveForm();
 
-function onFormData(evt) {
-  let formInputs = localStorage.getItem(LOCALSTORAGE_KEY);
-  formInputs = formInputs ? JSON.parse(formInputs) : {};
-  formInputs[evt.target.name] = evt.target.value;
-  localStorage.setItem(LOCALSTORAGE_KEY, JSON.stringify(formInputs));
-}
-
-function onSubmitForm(evt) {
-  console.log(formInputs);
-  evt.preventDefault();
-  const email = formFeedback.elements.email.value;
-  const message = formFeedback.elements.message.value;
-  if (email === '' || message === '') {
-    alert('Всі поля повинні бути заповнені');
-    return;
+formField.addEventListener('submit', event => {
+  event.preventDefault();
+  const {
+    elements: { email, message },
+  } = event.currentTarget;
+  if (email.value === '' || message.value === '') {
+    return alert('Заполните все поля!');
   }
-
-  formFeedback.reset();
-  localStorage.clear();
+  const data = { email: email.value, message: message.value };
+  console.log(data);
+  localStorage.removeItem(STORAGE_KEY);
+  event.currentTarget.reset();
+});
+formField.addEventListener('input', throttle(inputForm, 500));
+function inputForm(event) {
+  let filterInputs = localStorage.getItem(STORAGE_KEY);
+  filterInputs = filterInputs ? JSON.parse(filterInputs) : {};
+  filterInputs[event.target.name] = event.target.value;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(filterInputs));
 }
+function saveForm() {
+  let filterInputs = localStorage.getItem(STORAGE_KEY);
 
-function initForm() {
-  let inputFormValues = localStorage.getItem(LOCALSTORAGE_KEY);
-  if (inputFormValues) {
-    inputFormValues = JSON.parse(inputFormValues);
-    console.log(inputFormValues);
-    Object.entries(inputFormValues).forEach(([name, value]) => {
-      // console.log(name, value);
-      // formData[name] = value;
-      formFeedback.elements[name].value = value;
-    });
+  if (filterInputs) {
+    filterInputs = JSON.parse(filterInputs);
+    console.log(filterInputs);
+    formField.email.value = filterInputs.email;
+    formField.message.value = filterInputs.message;
   }
 }
