@@ -31,6 +31,6 @@ function saveForm() {
     filterInputs = JSON.parse(filterInputs);
     console.log(filterInputs);
     formField.email.value = filterInputs.email;
-    formField.message.value = filterInputs.message;
+    // formField.message.value = filterInputs.message;
   }
 }
